@@ -7,31 +7,34 @@ import doctest
 ###################################################################################################################
 
 
-def init(n):
-    """(nb disques) -> liste initiale"""
+def init(n: int) -> list:
+    """Renvoie la liste initiale
+    >>> init(3)
+    [[3,2,1],[],[]]
+    """
     return [[i for i in range(n, 0, -1)], [], []]
 
 
-def nbDisques(plateau, numtour):
+def nbDisques(plateau: list, numtour: int) -> int:
     """(liste config, num tour) -> nb disques tour"""
     return len(plateau[numtour])
 
 
-def disqueSup(plateau, numtour):
+def disqueSup(plateau: list, numtour: int) -> int:
     """(liste config, num tour) -> num disque supérieur de la tour (-1 si incorrect)"""
     if nbDisques(plateau, numtour) == 0:
         return -1
     return plateau[numtour][-1]
 
 
-def posDisque(plateau, numdisque):
+def posDisque(plateau: list, numdisque: int) -> int:
     """(liste config, num disque) -> position disque (num tour)"""
     for i in range(len(plateau)):
         if numdisque in plateau[i]:
             return i
 
 
-def verifDep1(plateau, nt1, nt2):
+def verifDep1(plateau: list, nt1: int, nt2: int) -> bool:
     """(liste config, pos1, pos2) -> bool (déplacement possible ou non)"""
     if nbDisques(plateau, nt1) != 0 and (
         disqueSup(plateau, nt1) < disqueSup(plateau, nt2)
@@ -41,7 +44,7 @@ def verifDep1(plateau, nt1, nt2):
     return False
 
 
-def verifVictoire(plateau, n):
+def verifVictoire(plateau: list, n: int) -> bool:
     """(liste config, nb disques) -> bool (victoire)"""
     return plateau == [[], [], [i for i in range(n, 0, -1)]]
 
@@ -53,9 +56,8 @@ def verifVictoire(plateau, n):
 tl.speed(0)
 
 
-def dessinePlateau(n):
-    """(nb disques) ->"""
-    """ Dessine le plateau de jeu vide pouvant recevoir n disques """
+def dessinePlateau(n: int):
+    """Dessine le plateau de jeu vide pouvant recevoir n disques"""
     tl.color("black")
     diametre_grandDisque = 40 + 30 * (n - 1)
     tl.up()
@@ -80,9 +82,8 @@ def dessinePlateau(n):
         tl.forward(diametre_grandDisque / 2 - 3)
 
 
-def dessineDisque(nd, plateau, n):
-    """(num Disque, liste config, nb disques) ->"""
-    """ Trouve les coordonnées du disque nd et le dessine """
+def dessineDisque(nd: int, plateau: list, n: int):
+    """Trouve les coordonnées du disque nd et le dessine"""
     tl.up()
     cos_defaut = (-300, -200)
     tl.goto(cos_defaut)
@@ -97,7 +98,7 @@ def dessineDisque(nd, plateau, n):
         + 20 * tour_disque
         + (40 + 30 * (n - 1)) * (tour_disque - 1)
         + 15 * (n - nd),
-        cos_defaut[1] + 20 * (ind_disque+1),
+        cos_defaut[1] + 20 * (ind_disque + 1),
     )
     tl.down()
     tl.color("black")
@@ -111,9 +112,8 @@ def dessineDisque(nd, plateau, n):
     tl.end_fill()
 
 
-def effaceDisque(nd, plateau, n):
-    """(num Disque, liste config, nb disques) ->"""
-    """ Trouve les coordonnées du disque nd et l'efface """
+def effaceDisque(nd: int, plateau: list, n: int):
+    """Trouve les coordonnées du disque nd et l'efface"""
     tl.up()
     cos_defaut = (-300, -200)
     tl.goto(cos_defaut)
@@ -157,9 +157,8 @@ def effaceDisque(nd, plateau, n):
     tl.forward((40 + 30 * (nd - 1)) / 2 - 3)
 
 
-def effaceTout(plateau, n):
-    """(liste config, nb disques) ->"""
-    """ Efface tous les disques """
+def effaceTout(plateau: list, n: int):
+    """Efface tous les disques"""
     for i in range(1, n + 1):
         effaceDisque(i, plateau, n)
 
@@ -169,15 +168,13 @@ def effaceTout(plateau, n):
 ###################################################################################################################
 
 
-def lireCoords(plateau):
-    """(liste config) -> (num tour départ, num tour arrivée)"""
-
+def lireCoords(plateau: list) -> tuple[int, int]:
     # ATTENTION : Nous partons du principe que les 3 tours portent les numéros 0, 1 et 2 !
     verif = False
     while not verif:
         tour_dep = int(input("Tour de départ ? "))
         # Existence de la tour
-        if not (0 <= tour_dep <= 2):
+        if type(tour_dep) == int and not (0 <= tour_dep <= 2):
             print("Entrée invalide ! Cette tour n'existe pas.")
         # Verif tour vide ou non
         elif len(plateau[tour_dep]) == 0:
@@ -207,9 +204,8 @@ def lireCoords(plateau):
     return (tour_dep, tour_arr)
 
 
-def jouerUnCoup(plateau, n):
-    """(liste config, nb disques) ->"""
-    """ Récupère le déplacement du joueur et déplace le disque + modifie la configuration """
+def jouerUnCoup(plateau: list, n: int):
+    """Récupère le déplacement du joueur et déplace le disque + modifie la configuration"""
     tour_dep, tour_arr = lireCoords(plateau)
     effaceDisque(disqueSup(plateau, tour_dep), plateau, n)
     plateau[tour_arr].append(disqueSup(plateau, tour_dep))
@@ -217,9 +213,8 @@ def jouerUnCoup(plateau, n):
     dessineDisque(disqueSup(plateau, tour_arr), plateau, n)
 
 
-def boucleJeu(plateau, n):
-    """(liste config, nb disques) -> cpt coups"""
-    """ Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire """
+def boucleJeu(plateau: list, n: int) -> int:
+    """Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire"""
     cpt = 0
     while not verifVictoire(plateau, n):
         jouerUnCoup(plateau, n)
@@ -227,25 +222,27 @@ def boucleJeu(plateau, n):
         cpt += 1
     return "Bravo, tu as fini en " + str(cpt) + " mouvements !"
 
+
 ###################################################################################################################
 ################################################### Partie D ######################################################
 ###################################################################################################################
 
-def dernierCoup(coups):
-    """ (dict coups) -> (tour_dep, tour_arr) """
-    """ Renvoie le dernier coup joué """
-    av_der = coups[len(coups)-2]
-    der = coups[len(coups)-1]
+
+def dernierCoup(coups: dict) -> tuple[int, int]:
+    """Renvoie le dernier coup joué"""
+    av_der = coups[len(coups) - 2]
+    der = coups[len(coups) - 1]
     for i in range(3):
         if len(av_der[i]) < len(der[i]):
             tour_dep = i
         elif len(av_der[i]) > len(der[i]):
             tour_arr = i
-    return (tour_dep,tour_arr)
+    return (tour_dep, tour_arr)
 
-def annulerDernierCoup(coups):
-    """ (dict coups) -> """
-    """ Annule le dernier coups (modifie le dictionnaire) """
+
+def annulerDernierCoup(coups: dict):
+    """Annule le dernier coups (modifie le dictionnaire)"""
+
 
 ###################################################################################################################
 ############################################## Programme principal ################################################
@@ -253,7 +250,7 @@ def annulerDernierCoup(coups):
 
 print("Bienvenue dans le jeu : Les tours de Hanoi !")
 nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
-while nb <= 0:
+while int(nb) <= 0:
     print("Pas possible bro :3")
     nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
 dessinePlateau(nb)
@@ -261,3 +258,5 @@ for i in range(nb):
     dessineDisque(i + 1, init(nb), nb)
 print(boucleJeu(init(nb), nb))
 tl.done()
+
+doctest.testmod()
