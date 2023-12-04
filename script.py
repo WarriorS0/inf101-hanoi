@@ -11,7 +11,7 @@ from pickle import *
 def init(n: int) -> list:
     """Renvoie la liste initiale
     >>> init(3)
-    [[3,2,1],[],[]]
+    [[3,2,1], [], []]
     """
     return [[i for i in range(n, 0, -1)], [], []]
 
@@ -173,16 +173,17 @@ def lireCoords(plateau: list) -> tuple[int, int]:
     # ATTENTION : Nous partons du principe que les 3 tours portent les numéros 0, 1 et 2 !
     verif = False
     while not verif:
-        tour_dep = int(input("Tour de départ ? "))
+        tour_dep = input("Tour de départ ? ")
         # Existence de la tour
-        if type(tour_dep) == "int" and not (0 <= tour_dep <= 2):
+        if tour_dep not in ["0","1","2"]:
             print("Entrée invalide ! Cette tour n'existe pas.")
         # Verif tour vide ou non
-        elif len(plateau[tour_dep]) == 0:
+        elif len(plateau[int(tour_dep)]) == 0:
             print("Entrée invalide ! Tour vide.")
 
         else:
             # Vérif mvt possibles ou non
+            tour_dep = int(tour_dep)
             if (
                 verifDep1(plateau, tour_dep, 0)
                 or verifDep1(plateau, tour_dep, 1)
@@ -194,13 +195,14 @@ def lireCoords(plateau: list) -> tuple[int, int]:
 
     verif = False
     while not verif:
-        tour_arr = int(input("Tour d'arrivée ? "))
-        if not (0 <= tour_arr <= 2):
+        tour_arr = input("Tour d'arrivée ? ")
+        if tour_arr not in ["0","1","2"]:
             print("Entrée invalide ! Cette tour n'existe pas.")
-        elif not (verifDep1(plateau, tour_dep, tour_arr)):
+        elif not (verifDep1(plateau, tour_dep, int(tour_arr))):
             print("Déplacement impossible.")
         else:
             verif = True
+            tour_arr = int(tour_arr)
 
     return (tour_dep, tour_arr)
 
@@ -217,20 +219,22 @@ def jouerUnCoup(plateau: list, n: int):
 def boucleJeu(plateau: list, n: int) -> int:
     """Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire"""
     global cpt
+    temps1 = time()
     cpt = 0
     coups = {0: init(nb)}
     while not verifVictoire(plateau, n):
         jouerUnCoup(plateau, n)
         cpt += 1
         coups[cpt] = plateau
-        print(coups)
-        annulation = input(
-            'Si vous souhaitez annuler votre dernier coup, tapez "cancel" !'
-        )
+        if not verifVictoire(plateau, n):
+            annulation = input(
+                'Si vous souhaitez annuler votre dernier coup, tapez "cancel" ! '
+            )
         if annulation == "cancel":
             annulerDernierCoup(coups)
             plateau = coups[cpt]
-    return "Bravo, tu as fini en " + str(cpt) + " mouvements !"
+    temps2 = time()
+    return "Bravo, tu as fini en " + str(cpt) + " mouvements et en " + str(int(temps2-temps1)) + " secondes !"
 
 
 ###################################################################################################################
@@ -254,11 +258,11 @@ def annulerDernierCoup(coups: dict):
     """Annule le dernier coups (modifie le dictionnaire)"""
     dep, arr = dernierCoup(coups)
     global cpt
-    print(coups[cpt])
     effaceDisque(coups[cpt][arr][-1], coups[cpt], len(coups[0][0]))
-    dessineDisque(coups[cpt][dep][-1], coups[cpt], len(coups[0][0]))
     del coups[cpt]
     cpt -= 1
+    print(coups[cpt][dep])
+    dessineDisque(coups[cpt][dep][-1], coups[cpt], len(coups[0][0]))
 
 
 ###################################################################################################################
@@ -266,22 +270,33 @@ def annulerDernierCoup(coups: dict):
 ###################################################################################################################
 
 
-def sauvScore(joueur: str, nbDisques: int, nbCoups: int):
+def sauvScore(joueur: str, nbDisques: int, nbCoups: int, temps: int):
     if joueur in scores:
-        scores[joueur].append((nbDisques, nbCoups))
+        scores[joueur].append((nbDisques, nbCoups, temps))
     else:
-        scores[joueur] = [(nbDisques, nbCoups)]
+        scores[joueur] = [(nbDisques, nbCoups, temps)]
 
 
 ###################################################################################################################
 ############################################## Programme principal ################################################
 ###################################################################################################################
 
+tl.hideturtle()
 print("Bienvenue dans le jeu : Les tours de Hanoi !")
-nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
-while nb <= 0:
-    print("Nombre impossible !")
-    nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
+verifType = False
+# Vérification du type de valeur -> erreur du int renvoie au except
+# Et vérification que nb > 0
+
+while not verifType:
+    try:
+        nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
+        if nb <= 0:
+            print("Nombre impossible !")
+        else:
+            verifType = True
+    except:
+        print("Valeur impossible !")
+
 dessinePlateau(nb)
 for i in range(nb):
     dessineDisque(i + 1, init(nb), nb)
