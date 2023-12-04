@@ -1,6 +1,7 @@
 import turtle as tl
 from time import *
 import doctest
+from pickle import *
 
 ###################################################################################################################
 ################################################### Partie A ######################################################
@@ -174,7 +175,7 @@ def lireCoords(plateau: list) -> tuple[int, int]:
     while not verif:
         tour_dep = int(input("Tour de départ ? "))
         # Existence de la tour
-        if type(tour_dep) == int and not (0 <= tour_dep <= 2):
+        if type(tour_dep) == "int" and not (0 <= tour_dep <= 2):
             print("Entrée invalide ! Cette tour n'existe pas.")
         # Verif tour vide ou non
         elif len(plateau[tour_dep]) == 0:
@@ -215,11 +216,20 @@ def jouerUnCoup(plateau: list, n: int):
 
 def boucleJeu(plateau: list, n: int) -> int:
     """Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire"""
+    global cpt
     cpt = 0
+    coups = {0: init(nb)}
     while not verifVictoire(plateau, n):
         jouerUnCoup(plateau, n)
-        print(plateau)
         cpt += 1
+        coups[cpt] = plateau
+        print(coups)
+        annulation = input(
+            'Si vous souhaitez annuler votre dernier coup, tapez "cancel" !'
+        )
+        if annulation == "cancel":
+            annulerDernierCoup(coups)
+            plateau = coups[cpt]
     return "Bravo, tu as fini en " + str(cpt) + " mouvements !"
 
 
@@ -242,6 +252,25 @@ def dernierCoup(coups: dict) -> tuple[int, int]:
 
 def annulerDernierCoup(coups: dict):
     """Annule le dernier coups (modifie le dictionnaire)"""
+    dep, arr = dernierCoup(coups)
+    global cpt
+    print(coups[cpt])
+    effaceDisque(coups[cpt][arr][-1], coups[cpt], len(coups[0][0]))
+    dessineDisque(coups[cpt][dep][-1], coups[cpt], len(coups[0][0]))
+    del coups[cpt]
+    cpt -= 1
+
+
+###################################################################################################################
+################################################### Partie E ######################################################
+###################################################################################################################
+
+
+def sauvScore(joueur: str, nbDisques: int, nbCoups: int):
+    if joueur in scores:
+        scores[joueur].append((nbDisques, nbCoups))
+    else:
+        scores[joueur] = [(nbDisques, nbCoups)]
 
 
 ###################################################################################################################
@@ -250,13 +279,15 @@ def annulerDernierCoup(coups: dict):
 
 print("Bienvenue dans le jeu : Les tours de Hanoi !")
 nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
-while int(nb) <= 0:
-    print("Pas possible bro :3")
+while nb <= 0:
+    print("Nombre impossible !")
     nb = int(input("Combien souhaitez-vous de disques en jeu ? "))
 dessinePlateau(nb)
 for i in range(nb):
     dessineDisque(i + 1, init(nb), nb)
 print(boucleJeu(init(nb), nb))
 tl.done()
+
+scores = {}
 
 doctest.testmod()
