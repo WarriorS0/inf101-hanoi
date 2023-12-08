@@ -1,7 +1,7 @@
 import turtle as tl
 from time import *
 import doctest
-from pickle import *
+import pickle
 
 ###################################################################################################################
 ################################################### Partie A ######################################################
@@ -11,32 +11,51 @@ from pickle import *
 def init(n: int) -> list:
     """Renvoie la liste initiale
     >>> init(3)
-    [[3,2,1], [], []]
+    [[3, 2, 1], [], []]
     """
+
     return [[i for i in range(n, 0, -1)], [], []]
 
 
 def nbDisques(plateau: list, numtour: int) -> int:
-    """(liste config, num tour) -> nb disques tour"""
+    """(liste config, num tour) -> nb disques tour
+    >>> nbDisques(init(3), 0)
+    3
+    """
+
     return len(plateau[numtour])
 
 
 def disqueSup(plateau: list, numtour: int) -> int:
-    """(liste config, num tour) -> num disque supérieur de la tour (-1 si incorrect)"""
+    """(liste config, num tour) -> num disque supérieur de la tour (-1 si incorrect)
+    >>> disqueSup(init(3), 0)
+    1
+    """
+
     if nbDisques(plateau, numtour) == 0:
         return -1
     return plateau[numtour][-1]
 
 
 def posDisque(plateau: list, numdisque: int) -> int:
-    """(liste config, num disque) -> position disque (num tour)"""
+    """(liste config, num disque) -> position disque (num tour)
+    >>> posDisque(init(3), 2)
+    0
+    """
+
     for i in range(len(plateau)):
         if numdisque in plateau[i]:
             return i
 
 
 def verifDep1(plateau: list, nt1: int, nt2: int) -> bool:
-    """(liste config, pos1, pos2) -> bool (déplacement possible ou non)"""
+    """(liste config, pos1, pos2) -> bool (déplacement possible ou non)
+    >>> verifDep1(init(3), 0, 2)
+    True
+    >>> verifDep1([[3], [2, 1], []], 0, 1)
+    False
+    """
+
     if nbDisques(plateau, nt1) != 0 and (
         disqueSup(plateau, nt1) < disqueSup(plateau, nt2)
         or nbDisques(plateau, nt2) == 0
@@ -46,7 +65,11 @@ def verifDep1(plateau: list, nt1: int, nt2: int) -> bool:
 
 
 def verifVictoire(plateau: list, n: int) -> bool:
-    """(liste config, nb disques) -> bool (victoire)"""
+    """(liste config, nb disques) -> bool (victoire)
+    >>> verifVictoire([[], [], [3, 2, 1]], 3)
+    True
+    """
+
     return plateau == [[], [], [i for i in range(n, 0, -1)]]
 
 
@@ -59,6 +82,7 @@ tl.speed(0)
 
 def dessinePlateau(n: int):
     """Dessine le plateau de jeu vide pouvant recevoir n disques"""
+
     tl.color("black")
     diametre_grandDisque = 40 + 30 * (n - 1)
     tl.up()
@@ -85,6 +109,7 @@ def dessinePlateau(n: int):
 
 def dessineDisque(nd: int, plateau: list, n: int):
     """Trouve les coordonnées du disque nd et le dessine"""
+
     tl.up()
     cos_defaut = (-300, -200)
     tl.goto(cos_defaut)
@@ -115,6 +140,7 @@ def dessineDisque(nd: int, plateau: list, n: int):
 
 def effaceDisque(nd: int, plateau: list, n: int):
     """Trouve les coordonnées du disque nd et l'efface"""
+
     tl.up()
     cos_defaut = (-300, -200)
     tl.goto(cos_defaut)
@@ -160,6 +186,7 @@ def effaceDisque(nd: int, plateau: list, n: int):
 
 def effaceTout(plateau: list, n: int):
     """Efface tous les disques"""
+
     for i in range(1, n + 1):
         effaceDisque(i, plateau, n)
 
@@ -170,12 +197,15 @@ def effaceTout(plateau: list, n: int):
 
 
 def lireCoords(plateau: list) -> tuple[int, int]:
+    """Demande des coordonnées de déplacement et vérifie si le mouvement est possible avant de le renvoyer"""
+
     # ATTENTION : Nous partons du principe que les 3 tours portent les numéros 0, 1 et 2 !
+
     verif = False
     while not verif:
         tour_dep = input("Tour de départ ? ")
         # Existence de la tour
-        if tour_dep not in ["0","1","2"]:
+        if tour_dep not in ["0", "1", "2"]:
             print("Entrée invalide ! Cette tour n'existe pas.")
         # Verif tour vide ou non
         elif len(plateau[int(tour_dep)]) == 0:
@@ -196,7 +226,7 @@ def lireCoords(plateau: list) -> tuple[int, int]:
     verif = False
     while not verif:
         tour_arr = input("Tour d'arrivée ? ")
-        if tour_arr not in ["0","1","2"]:
+        if tour_arr not in ["0", "1", "2"]:
             print("Entrée invalide ! Cette tour n'existe pas.")
         elif not (verifDep1(plateau, tour_dep, int(tour_arr))):
             print("Déplacement impossible.")
@@ -209,6 +239,7 @@ def lireCoords(plateau: list) -> tuple[int, int]:
 
 def jouerUnCoup(plateau: list, n: int):
     """Récupère le déplacement du joueur et déplace le disque + modifie la configuration"""
+
     tour_dep, tour_arr = lireCoords(plateau)
     effaceDisque(disqueSup(plateau, tour_dep), plateau, n)
     plateau[tour_arr].append(disqueSup(plateau, tour_dep))
@@ -216,8 +247,9 @@ def jouerUnCoup(plateau: list, n: int):
     dessineDisque(disqueSup(plateau, tour_arr), plateau, n)
 
 
-def boucleJeu(plateau: list, n: int) -> int:
+def boucleJeu(plateau: list, n: int) -> tuple[int, int, bool]:
     """Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire"""
+
     global cpt
     temps1 = time()
     cpt = 0
@@ -234,7 +266,14 @@ def boucleJeu(plateau: list, n: int) -> int:
             annulerDernierCoup(coups)
             plateau = coups[cpt]
     temps2 = time()
-    return "Bravo, tu as fini en " + str(cpt) + " mouvements et en " + str(int(temps2-temps1)) + " secondes !"
+    print(
+        "Bravo, tu as fini en "
+        + str(cpt)
+        + " mouvements et en "
+        + str(int(temps2 - temps1))
+        + " secondes !"
+    )
+    return cpt, int(temps2 - temps1), True
 
 
 ###################################################################################################################
@@ -244,6 +283,7 @@ def boucleJeu(plateau: list, n: int) -> int:
 
 def dernierCoup(coups: dict) -> tuple[int, int]:
     """Renvoie le dernier coup joué"""
+
     av_der = coups[len(coups) - 2]
     der = coups[len(coups) - 1]
     for i in range(3):
@@ -256,6 +296,7 @@ def dernierCoup(coups: dict) -> tuple[int, int]:
 
 def annulerDernierCoup(coups: dict):
     """Annule le dernier coups (modifie le dictionnaire)"""
+
     dep, arr = dernierCoup(coups)
     global cpt
     effaceDisque(coups[cpt][arr][-1], coups[cpt], len(coups[0][0]))
@@ -271,15 +312,46 @@ def annulerDernierCoup(coups: dict):
 
 
 def sauvScore(joueur: str, nbDisques: int, nbCoups: int, temps: int):
+    """Stocke les données d'une partie dans le dictionnaire scores (stocké en binaire dans le fichier data)"""
+
+    with open("data", "rb") as data:
+        scores = pickle.load(data)
+
     if joueur in scores:
         scores[joueur].append((nbDisques, nbCoups, temps))
     else:
         scores[joueur] = [(nbDisques, nbCoups, temps)]
 
+    with open("data", "wb") as data:
+        pickle.dump(scores, data)
+
+
+###################################################################################################################
+################################################### Partie F ######################################################
+###################################################################################################################
+
+listeDep = []
+nb = 3
+
+
+def resolution(n: int, dep=0, arr=2, int=1):
+    """Renvoie la liste des déplacements afin de résoudre le problème à n disques"""
+    if n == 1:
+        listeDep.append((dep, arr))
+    else:
+        resolution(n - 1, dep, int, arr)
+        listeDep.append((dep, arr))
+        resolution(n - 1, int, arr, dep)
+
+
+def dessineRes(dep):
+    """Joue les dédplacements pour résoudre le problème à n disques"""
+
 
 ###################################################################################################################
 ############################################## Programme principal ################################################
 ###################################################################################################################
+
 
 tl.hideturtle()
 print("Bienvenue dans le jeu : Les tours de Hanoi !")
@@ -300,9 +372,17 @@ while not verifType:
 dessinePlateau(nb)
 for i in range(nb):
     dessineDisque(i + 1, init(nb), nb)
-print(boucleJeu(init(nb), nb))
-tl.done()
+coups, temps, victoire = boucleJeu(init(nb), nb)
 
-scores = {}
+sleep(2)
+tl.bye()
+
+if victoire:
+    joueur = input("Quel est votre nom ? ")
+    sauvScore(joueur, nb, cpt, temps)
+
+with open("data", "rb") as data:
+    print(pickle.load(data))
+
 
 doctest.testmod()
