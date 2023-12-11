@@ -1,6 +1,10 @@
 import turtle as tl
 from partA import *
 
+###################################################################################################################
+####################################### Partie B : Graphisme avec Turtle ##########################################
+###################################################################################################################
+
 tl.speed(0)
 
 def dessinePlateau(n: int):
@@ -9,7 +13,7 @@ def dessinePlateau(n: int):
     tl.color("black")
     diametre_grandDisque = 40 + 30 * (n - 1)
     tl.up()
-    tl.goto(-300, -200)
+    tl.goto(-(diametre_grandDisque*1.5 + 40), -(20*(n+2))/2) #Permet dde centrer le plateau de jeu dans la fenêtre
     tl.down()
     # Base du plateau
     for i in range(2):
@@ -42,7 +46,8 @@ def dessineDisque(nd: int, plateau: list, n: int):
     """Trouve les coordonnées du disque nd et le dessine"""
 
     tl.up()
-    cos_defaut = (-300, -200)
+    diametre_grandDisque = 40 + 30 * (n - 1)
+    cos_defaut = (-(diametre_grandDisque*1.5 + 40), -(20*(n+2))/2)
     tl.goto(cos_defaut)
     tour_disque = posDisque(plateau, nd)
     ind_disque = None
@@ -73,7 +78,8 @@ def effaceDisque(nd: int, plateau: list, n: int):
     """Trouve les coordonnées du disque nd et l'efface"""
 
     tl.up()
-    cos_defaut = (-300, -200)
+    diametre_grandDisque = 40 + 30 * (n - 1)
+    cos_defaut = (-(diametre_grandDisque*1.5 + 40), -(20*(n+2))/2)
     tl.goto(cos_defaut)
     tour_disque = posDisque(plateau, nd)
     ind_disque = None
