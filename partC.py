@@ -1,7 +1,16 @@
 import turtle as tl
 from time import *
+import sys
+sys.path.append("../")
+from script import boutons
 from partA import *
 from partB import *
+from partD import *
+import pickle
+
+###################################################################################################################
+################################### Partie C : Interactions avec le joueur ########################################
+###################################################################################################################
 
 def lireCoords(plateau: list) -> tuple[int, int]:
     """Demande des coordonnées de déplacement et vérifie si le mouvement est possible avant de le renvoyer"""
@@ -52,29 +61,30 @@ def jouerUnCoup(plateau: list, n: int):
     dessineDisque(disqueSup(plateau, tour_arr), plateau, n)
 
 
-def boucleJeu(plateau: list, n: int) -> tuple[int, int, bool]:
+def boucleJeu(plateau: list, n: int) -> tuple[int, float, bool]:
     """Interragit avec l'utilisateur pour déplacer des disques jusqu'à la victoire"""
-
-    global cpt
+    
     temps1 = time()
+    
+    with open("cpt","wb") as cptFile:
+        pickle.dump(0, cptFile)
     cpt = 0
+    
     coups = {0: init(n)}
     while not verifVictoire(plateau, n):
         jouerUnCoup(plateau, n)
         cpt += 1
+        with open("cpt","wb") as cptFile:
+            pickle.dump(cpt, cptFile)
+            
         coups[cpt] = plateau
-        if not verifVictoire(plateau, n):
-            """
-            tl.listen()
-            tl.onkeyrelease(annulerDernierCoup(coups), "R")
-            plateau = coups[cpt]
-            """
+            
     temps2 = time()
     print(
         "Bravo, tu as fini en "
         + str(cpt)
         + " mouvements et en "
-        + str(int(temps2 - temps1))
+        + str(round(temps2 - temps1,1))
         + " secondes !"
     )
-    return cpt, int(temps2 - temps1), True
+    return cpt, round(temps2 - temps1,1), True
