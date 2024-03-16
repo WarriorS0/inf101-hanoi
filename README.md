@@ -4,8 +4,7 @@
    ██    ██    ██ ██    ██ ██   ██      ██     ██   ██ ██          ██   ██ ██   ██ ██  ██ ██ ██    ██ ██ 
    ██     ██████   ██████  ██   ██ ███████     ██████  ███████     ██   ██ ██   ██ ██   ████  ██████  ██ 
 
-Projet INF101 (IMA-7, DLST UGA)
-Achille Blanc--Mounier / Thibaut Espi
+Projet INF101 (DLST - UGA)
 
 Fichier à exécuter : script.py 
 (Aucun module supplémentaire à installer)
